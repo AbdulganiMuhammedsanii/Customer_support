@@ -1,14 +1,23 @@
 "use client";
-import { Box, Stack, TextField, Button, Typography, IconButton, Select, MenuItem, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import { Brightness4, Brightness7 } from '@mui/icons-material';
+import { Box, Stack, Menu, Modal, TextField, Button, Typography, IconButton, Select, MenuItem, MenuItem as DropdownItem, Avatar, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { Brightness4, Brightness7, AccountCircle } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { GlobalStyles } from '@mui/system';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { Google } from '@mui/icons-material';
 import './styles.css'; // Create a styles.css file for transitions
+import { auth, provider, signInWithPopup } from '../lib/firebase'; // Adjust path as needed
+import { signOut } from 'firebase/auth';
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState('en'); // 'en' for English, 'es' for Spanish
+  const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null); // State to store the signed-in user's info
+
+  const [anchorEl, setAnchorEl] = useState(null); // State for the menu
+
+
   const getInitialMessage = (language) => {
     switch (language) {
       case 'es':
@@ -35,6 +44,34 @@ export default function Home() {
       mode: darkMode ? 'dark' : 'light',
     },
   });
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+
+
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user); // Store the user info in state
+      handleClose(); // Close the modal on successful sign-in
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      console.log('Signing out...');
+      await signOut(auth);
+      setUser(null); // Clear the user state
+      handleMenuClose(); // Close the menu
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const sendMessage = async () => {
     // Add the user's message to the conversation
     const systemPrompt = language === 'es'
@@ -98,6 +135,12 @@ export default function Home() {
     await reader.read().then(processText);
   };
 
+  useEffect(() => {
+    if (user) {
+      console.log("User signed in:", user);
+    }
+  }, [user]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -106,7 +149,7 @@ export default function Home() {
           <Typography variant="h6" component="div">
             CornellGPT
           </Typography>
-          <Box>
+          <Box display="flex" alignItems="center" ml="auto">
             <Select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
@@ -121,6 +164,22 @@ export default function Home() {
             <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
               {darkMode ? <Brightness7 /> : <Brightness4 />}
             </IconButton>
+            <IconButton
+              color="inherit"
+              sx={{ ml: 2 }}
+              onClick={user ? handleMenuOpen : handleOpen}
+            >
+              <Avatar src={user ? user.photoURL : null}>
+                {user ? null : <Google />}
+              </Avatar>
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              {user && <DropdownItem onClick={handleSignOut}>Sign Out</DropdownItem>}
+            </Menu>
           </Box>
         </Box>
         <Stack direction={'column'} width="500px" height="700px" border="1px solid" borderColor="divider" borderRadius={2} p={2} mt={2} spacing={3} bgcolor="background.paper">
@@ -140,6 +199,33 @@ export default function Home() {
             </Button>
           </Stack>
         </Stack>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="sign-in-modal"
+          aria-describedby="sign-in-options"
+        >
+          <Box
+            position="absolute"
+            top="50%"
+            left="50%"
+            sx={{ transform: "translate(-50%, -50%)", width: 300, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 24, p: 4 }}
+          >
+            <Typography id="sign-in-modal" variant="h6" component="h2" gutterBottom>
+              Sign In
+            </Typography>
+            <Button
+              variant="contained"
+              fullWidth
+              color="primary"
+              startIcon={<Google />}
+              onClick={signInWithGoogle}
+              sx={{ mt: 2 }}
+            >
+              Sign in with Google
+            </Button>
+          </Box>
+        </Modal>
       </Box>
     </ThemeProvider>
   );
