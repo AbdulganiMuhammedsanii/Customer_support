@@ -1,18 +1,12 @@
 import { NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
+import fs from 'fs';
+import path from 'path';
 
+// System prompt remains the same
 const systemPrompt = `
-""You are the customer support AI for Zara, a global fashion retailer offering trendy and stylish clothing, shoes, and accessories for men, women, and children. Your role is to assist customers with inquiries, provide information about products and services, help with order issues, and offer guidance on returns and exchanges.
+"First of all, in all your responses, NEVER have Customer or AI labels at the start. Return only the AI response without a tag no matter what. The following tags are merely to understand for the system prompt.You are the customer support AI for Zara, a global fashion retailer offering trendy and stylish clothing, shoes, and accessories for men, women, and children. Your role is to assist customers with inquiries, provide information about products and services, help with order issues, and offer guidance on returns and exchanges.
 
-Guidelines:
-1. Warm and Professional Tone: Greet customers politely and use a professional tone to ensure they feel valued and respected. Be empathetic and patient with their concerns.
-2. Provide Clear and Accurate Information: Ensure your responses are clear and accurate. If you don't have the information, guide customers on how they can find it or assure them that a human representative will follow up.
-3. Assistance with Orders: Help customers with order-related issues such as tracking, cancellations, and modifications. Provide step-by-step instructions for resolving issues.
-4. Guidance on Returns and Exchanges: Offer detailed information about Zara's return and exchange policies. Guide customers on how to initiate a return or exchange, including providing necessary links and forms.
-5. Product Information: Provide detailed information about Zara's products, including sizes, materials, care instructions, and availability. Assist with style advice if requested.
-6. Escalation to Human Support: If an issue cannot be resolved through automated responses, assure the customer that their query will be forwarded to a human representative. Collect necessary details to facilitate a swift resolution by the human support team.
-
-Example Interactions:
 1. General Inquiry:
     - Customer: 'What is Zara's return policy?'
     - AI: 'Hello! Zara offers a 30-day return policy for most items. You can return items in-store or by mail. Would you like detailed instructions on how to proceed?'
@@ -32,20 +26,84 @@ Example Interactions:
 Remember, your primary goal is to provide excellent customer service, ensuring customers have a smooth and enjoyable experience with Zara."
 `;
 
-
+// Initialize OpenAI
 const openai = new OpenAI();
 
+// Function to retrieve relevant documents from the knowledge base
+function retrieveDocuments(query) {
+  const filePath = path.join(process.cwd(), 'data', 'knowledge_base.json');
+  let knowledgeBase;
+  try {
+    const jsonData = fs.readFileSync(filePath, 'utf-8');
+    knowledgeBase = JSON.parse(jsonData);
+  } catch (error) {
+    console.error("Failed to read the knowledge base JSON file:", error);
+    return [];
+  }
+
+  const relevantDocs = [];
+  const queryWords = query.toLowerCase().split(' ');
+
+  knowledgeBase.forEach(doc => {
+    console.log("Processing document:", doc);  // Log the entire document
+
+    if (doc.content && typeof doc.content === 'string') {
+
+      const contentLower = doc.content.toLowerCase();
+      const containsQueryWord = queryWords.some(word => contentLower.includes(word));
+
+      if (containsQueryWord) {
+        console.log(`Document ID: ${doc.id} - Content: ${doc.content}`);
+        relevantDocs.push(doc);
+      }
+    } else {
+      console.warn(`Skipping document with undefined or invalid content:`, doc);
+    }
+  });
+
+  if (relevantDocs.length === 0) {
+    console.warn("No relevant documents found for query:", query);
+  }
+
+  return relevantDocs.slice(0, 3);
+}
+
 export async function POST(req) {
-  const data = await req.json();
+  // Parse the request body to extract the `query` parameter
+  const { query } = await req.json();
+
+  // Validation: Check if `query` is a valid string
+  if (typeof query !== 'string' || query.trim() === '') {
+    console.error("Invalid query received:", query);
+    return new NextResponse(JSON.stringify({ error: "Invalid query" }), { status: 400 });
+  }
+
+  console.log("Received query:", query);  // Log the received query for debugging
+
+  // Retrieve relevant documents based on the validated query
+  const retrievedDocs = retrieveDocuments(query);
+
+  if (retrievedDocs.length === 0) {
+    console.warn("No relevant documents found for query:", query);
+  }
+
+  // Combine the retrieved documents to form a context
+  const context = retrievedDocs.map(doc => doc.content).join("\n");
+
+  // Modify the system prompt to include the retrieved context
+  const modifiedPrompt = `${systemPrompt}\n\nContext:\n${context}\n\n`;
+
+  // Generate the response using OpenAI's API
   const completion = await openai.chat.completions.create({
     messages: [
-      { role: "system", content: systemPrompt },
-      ...data,
+      { role: "system", content: modifiedPrompt },
+      { role: "user", content: query },
     ],
     model: "gpt-3.5-turbo",
     stream: true,
   });
 
+  // Stream the response back to the client
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();

@@ -18,37 +18,60 @@ export default function Home() {
   });
 
   const sendMessage = async () => {
-    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }, { role: 'assistant', content: '' }]);
+    // Add the user's message to the conversation
+    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
+
+    // Clear the input field
     setMessage('');
 
+    // Send the message to the API
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify([{ role: 'user', content: message }]),
+      body: JSON.stringify({ query: message }),  // Adjusted to match the API's expected input format
     });
 
+    // Initialize a string to hold the entire response
+    let fullResponse = '';
+
+    // Read the response stream
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let result = '';
 
+    // Process the text chunks from the stream
     const processText = async ({ done, value }) => {
       if (done) {
-        return result;
+        // The stream is complete, so we can stop processing
+        return;
       }
-      const text = decoder.decode(value || new Uint8Array(), { stream: true });
+
+      // Decode the incoming chunk of text
+      let text = decoder.decode(value || new Uint8Array(), { stream: true });
+      text = text.replace(/^(Customer:|AI:)\s*/g, '');
+      // Update the last assistant's message with the new chunk of text
       setMessages((prevMessages) => {
         const lastMessage = prevMessages[prevMessages.length - 1];
-        const otherMessages = prevMessages.slice(0, prevMessages.length - 1);
 
-        return [...otherMessages, { ...lastMessage, content: lastMessage.content + text }];
+        // Check if the last message is from the assistant
+        if (lastMessage.role === 'assistant') {
+          // Update the assistant's message with the new text
+          const updatedMessage = { ...lastMessage, content: lastMessage.content + text };
+          const otherMessages = prevMessages.slice(0, prevMessages.length - 1);
+
+          return [...otherMessages, updatedMessage];
+        } else {
+          // If the last message is not from the assistant, just add the new message
+          return [...prevMessages, { role: 'assistant', content: text }];
+        }
       });
 
+      // Continue reading the next chunk of the stream
       const { value: nextValue, done: nextDone } = await reader.read();
       return processText({ done: nextDone, value: nextValue });
     };
-
+    // Start reading the stream
     await reader.read().then(processText);
   };
 
