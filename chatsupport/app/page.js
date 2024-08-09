@@ -1,24 +1,47 @@
 "use client";
-import { Box, Stack, TextField, Button, Typography, IconButton, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { Box, Stack, TextField, Button, Typography, IconButton, Select, MenuItem, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GlobalStyles } from '@mui/system';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './styles.css'; // Create a styles.css file for transitions
 
 export default function Home() {
-  const [messages, setMessages] = useState([{ role: 'assistant', content: 'Hello! Welcome to Zara Customer Service! How can I assist you today?' }]);
-  const [message, setMessage] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState('en'); // 'en' for English, 'es' for Spanish
+  const getInitialMessage = (language) => {
+    switch (language) {
+      case 'es':
+        return '¡Hola! Bienvenido al Asesor Académico de Informática. ¿En qué puedo ayudarte hoy?';
+      case 'zh':
+        return '你好！欢迎来到计算机科学学术顾问！今天我能为您做些什么？';
+      default:
+        return 'Hello! Welcome to the Computer Science Academic Advisor. How can I assist you today?';
+    }
+  };
+
+
+  const [messages, setMessages] = useState([{ role: 'assistant', content: getInitialMessage(language) }]);
+
+
+  useEffect(() => {
+    // Update the initial message when the language changes
+    setMessages([{ role: 'assistant', content: getInitialMessage(language) }]);
+  }, [language]); const [message, setMessage] = useState('');
+
 
   const theme = createTheme({
     palette: {
       mode: darkMode ? 'dark' : 'light',
     },
   });
-
   const sendMessage = async () => {
     // Add the user's message to the conversation
+    const systemPrompt = language === 'es'
+      ? 'Eres el asistente de atención al cliente de Zara. Responde en español.'
+      : language === 'zh'
+        ? '你是Zara的客户服务助理。请用中文回答。'
+        : 'You are the customer support assistant for Zara. Respond in English.';
     setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
 
     // Clear the input field
@@ -78,87 +101,46 @@ export default function Home() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={{
-        body: {
-          transition: 'background-color 0.5s ease, color 0.5s ease',
-        },
-      }} />
-      <CSSTransition
-        in={darkMode}
-        timeout={500}
-        classNames="fade"
-      >
-        <Box
-          width="100vw"
-          height="100vh"
-          display="flex"
-          flexDirection="column"
-          justifyContent="flex-start"
-          alignItems="center"
-          bgcolor="background.default"
-          color="text.primary"
-        >
-          <Box
-            width="100%"
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            p={2}
-            borderBottom="1px solid"
-            borderColor="divider"
-          >
-            <Typography variant="h6" component="div">
-              Zara Chatbot
-            </Typography>
+      <Box width="100vw" height="100vh" display="flex" flexDirection="column" justifyContent="flex-start" alignItems="center" bgcolor="background.default" color="text.primary">
+        <Box width="100%" display="flex" justifyContent="space-between" alignItems="center" p={2} borderBottom="1px solid" borderColor="divider">
+          <Typography variant="h6" component="div">
+            CornellGPT
+          </Typography>
+          <Box>
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ mr: 2 }}
+            >
+              <MenuItem value="en">English</MenuItem>
+              <MenuItem value="es">Español</MenuItem>
+              <MenuItem value="zh">中文</MenuItem>
+            </Select>
             <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
               {darkMode ? <Brightness7 /> : <Brightness4 />}
             </IconButton>
           </Box>
-          <Stack
-            direction={'column'}
-            width="500px"
-            height="700px"
-            border="1px solid"
-            borderColor="divider"
-            borderRadius={2}
-            p={2}
-            mt={2}
-            spacing={3}
-            bgcolor="background.paper"
-          >
-            <Stack direction={'column'} spacing={2} flexGrow={1} overflow="auto" maxHeight="100%">
-              {messages.map((message, index) => (
-                <Box
-                  key={index}
-                  display="flex"
-                  justifyContent={message.role === 'assistant' ? 'flex-start' : 'flex-end'}
-                >
-                  <Box
-                    bgcolor={message.role === 'assistant' ? 'primary.main' : 'secondary.main'}
-                    color="white"
-                    borderRadius={16}
-                    p={2}
-                  >
-                    <Typography variant="body1">{message.content}</Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
-            <Stack direction={'row'} spacing={2}>
-              <TextField
-                label="Message"
-                variant="outlined"
-                fullWidth
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <Button variant="contained" onClick={sendMessage}>
-                Send
-              </Button>
-            </Stack>
-          </Stack>
         </Box>
-      </CSSTransition>
+        <Stack direction={'column'} width="500px" height="700px" border="1px solid" borderColor="divider" borderRadius={2} p={2} mt={2} spacing={3} bgcolor="background.paper">
+          <Stack direction={'column'} spacing={2} flexGrow={1} overflow="auto" maxHeight="100%">
+            {messages.map((message, index) => (
+              <Box key={index} display="flex" justifyContent={message.role === 'assistant' ? 'flex-start' : 'flex-end'}>
+                <Box bgcolor={message.role === 'assistant' ? 'primary.main' : 'secondary.main'} color="white" borderRadius={16} p={2}>
+                  <Typography variant="body1">{message.content}</Typography>
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+          <Stack direction={'row'} spacing={2}>
+            <TextField label="Message" variant="outlined" fullWidth value={message} onChange={(e) => setMessage(e.target.value)} />
+            <Button variant="contained" onClick={sendMessage}>
+              Send
+            </Button>
+          </Stack>
+        </Stack>
+      </Box>
     </ThemeProvider>
   );
 }
