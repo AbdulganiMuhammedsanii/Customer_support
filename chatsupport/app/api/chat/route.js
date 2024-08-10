@@ -3,7 +3,6 @@ import { OpenAI } from 'openai';
 import fs from 'fs';
 import path from 'path';
 
-// System prompt remains the same
 const systemPrompt = `
 "First of all, in all your responses, NEVER have Student or AI labels at the start. Return only the AI response without a tag no matter what. The following tags are merely to understand the system prompt. You are the academic advisor AI for a university's Computer Science department. Your role is to assist students with inquiries about courses, provide detailed information about course content, prerequisites, and outcomes, and guide them on course selections.
 
@@ -45,19 +44,12 @@ function retrieveDocuments(query) {
   const queryWords = query.toLowerCase().split(' ');
 
   knowledgeBase.forEach(doc => {
-    console.log("Processing document:", doc);  // Log the entire document
+    const contentLower = doc.content.toLowerCase();
+    const containsQueryWord = queryWords.some(word => contentLower.includes(word));
 
-    if (doc.content && typeof doc.content === 'string') {
-
-      const contentLower = doc.content.toLowerCase();
-      const containsQueryWord = queryWords.some(word => contentLower.includes(word));
-
-      if (containsQueryWord) {
-        console.log(`Document ID: ${doc.id} - Content: ${doc.content}`);
-        relevantDocs.push(doc);
-      }
-    } else {
-      console.warn(`Skipping document with undefined or invalid content:`, doc);
+    if (containsQueryWord) {
+      console.log(doc)
+      relevantDocs.push(doc);
     }
   });
 
@@ -82,10 +74,6 @@ export async function POST(req) {
 
   // Retrieve relevant documents based on the validated query
   const retrievedDocs = retrieveDocuments(query);
-
-  if (retrievedDocs.length === 0) {
-    console.warn("No relevant documents found for query:", query);
-  }
 
   // Combine the retrieved documents to form a context
   const context = retrievedDocs.map(doc => doc.content).join("\n");
