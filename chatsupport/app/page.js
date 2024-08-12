@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, orderBy, addDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { auth, provider, signInWithPopup, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';  // Import useRouter for navigation
 
 const getInitialMessage = (language) => {
   switch (language) {
@@ -27,8 +28,13 @@ export default function Home() {
   const [messages, setMessages] = useState([{ role: 'assistant', content: getInitialMessage(language) }]);
   const [message, setMessage] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false); // State for Drawer
+  const router = useRouter();
 
   const isMobile = useMediaQuery('(max-width:600px)');
+
+  const handleNavigate = () => {
+    router.push('/explore');  // Navigate to the explore page
+  };
 
   const theme = createTheme({
     palette: {
@@ -65,8 +71,7 @@ export default function Home() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget); // Opens the Menu
-  const handleMenuClose = () => setAnchorEl(null); // Closes the Menu
+
   const toggleDrawer = () => setDrawerOpen(!drawerOpen); // Toggle Drawer
 
   const signInWithGoogle = async () => {
@@ -84,7 +89,6 @@ export default function Home() {
       await signOut(auth);
       setUser(null);
       setConversationHistory([]);
-      handleMenuClose();
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -257,42 +261,47 @@ export default function Home() {
                 CornellGPT
               </Typography>
               <Box display="flex" alignItems="center" ml="auto">
-                <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
-                  {darkMode ? <Brightness7 /> : <Brightness4 />}
-                </IconButton>
-                <IconButton
-                  color="inherit"
-                  sx={{ ml: 2 }}
-                  onClick={user ? handleMenuOpen : handleOpen}
-                >
-                  <Avatar src={user ? user.photoURL : null}>
-                    {user ? null : <Google />}
-                  </Avatar>
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                  PaperProps={{
-                    sx: {
-                      mt: 1.5,
-                      minWidth: 180,
-                      bgcolor: 'background.paper',
-                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-                      '& .MuiMenuItem-root': {
-                        padding: '12px 20px',
-                      },
+                <Button
+                  variant="contained"
+                  onClick={handleNavigate}
+                  sx={{
+                    ml: 2,
+                    mr: 2,
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    backgroundColor: darkMode ? '#333' : '#1976d2', // Blue color in light mode
+                    color: '#ffffff',
+                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+                    '&:hover': {
+                      backgroundColor: darkMode ? '#444' : '#1565c0', // Darker blue on hover in light mode
+                      boxShadow: '0 6px 15px rgba(0, 0, 0, 0.3)',
                     },
                   }}
                 >
-                  {user && (
-                    <MenuItem onClick={handleSignOut} sx={{ color: 'error.main', fontWeight: 'bold' }}>
-                      Sign Out
-                    </MenuItem>
-                  )}
-                </Menu>
+                  Courses
+                </Button>
+                <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
+                  {darkMode ? <Brightness7 /> : <Brightness4 />}
+                </IconButton>
+
+                <IconButton
+                  color="inherit"
+                  sx={{ ml: 2 }}
+                  onClick={user ? handleSignOut : signInWithGoogle}  // Direct redirect on click
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: darkMode ? '#1c1c1c' : '#f5f5f5',
+                      color: darkMode ? '#90caf9' : '#1976d2',
+                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+                    }}
+                  >
+                    {user ? <Avatar src={user.photoURL} /> : <Google />}
+                  </Avatar>
+                </IconButton>
               </Box>
             </Box>
+
             <Drawer
               anchor="left"
               open={drawerOpen}
@@ -390,6 +399,24 @@ export default function Home() {
                 CornellGPT
               </Typography>
               <Box display="flex" alignItems="center" ml="auto">
+                <Button
+                  variant="contained"
+                  onClick={handleNavigate}
+                  sx={{
+                    mr: 2,
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    backgroundColor: darkMode ? '#333' : '#1976d2', // Blue color in light mode
+                    color: '#ffffff',
+                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+                    '&:hover': {
+                      backgroundColor: darkMode ? '#444' : '#1565c0', // Darker blue on hover in light mode
+                      boxShadow: '0 6px 15px rgba(0, 0, 0, 0.3)',
+                    },
+                  }}
+                >
+                  COURSES
+                </Button>
                 <Select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
@@ -407,34 +434,18 @@ export default function Home() {
                 <IconButton
                   color="inherit"
                   sx={{ ml: 2 }}
-                  onClick={user ? handleMenuOpen : handleOpen}
+                  onClick={user ? handleSignOut : signInWithGoogle}  // Direct redirect on click
                 >
-                  <Avatar src={user ? user.photoURL : null}>
-                    {user ? null : <Google />}
+                  <Avatar
+                    sx={{
+                      bgcolor: darkMode ? '#1c1c1c' : '#f5f5f5',
+                      color: darkMode ? '#90caf9' : '#1976d2',
+                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+                    }}
+                  >
+                    {user ? <Avatar src={user.photoURL} /> : <Google />}
                   </Avatar>
                 </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                  PaperProps={{
-                    sx: {
-                      mt: 1.5,
-                      minWidth: 180,
-                      bgcolor: 'background.paper',
-                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-                      '& .MuiMenuItem-root': {
-                        padding: '12px 20px',
-                      },
-                    },
-                  }}
-                >
-                  {user && (
-                    <MenuItem onClick={handleSignOut} sx={{ color: 'error.main', fontWeight: 'bold' }}>
-                      Sign Out
-                    </MenuItem>
-                  )}
-                </Menu>
               </Box>
             </Box>
           )}
@@ -548,7 +559,7 @@ export default function Home() {
               bgcolor: 'background.paper',
               borderRadius: 4,
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-              p: 4,  // Corrected this line
+              p: 4,
             }}
           >
             <Typography id="sign-in-modal" variant="h6" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>

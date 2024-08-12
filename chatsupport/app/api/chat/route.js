@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
 import fs from 'fs';
 import path from 'path';
+import pool from '../../../db'; // Import the PostgreSQL connection
 
 const systemPrompt = `
 "First of all, in all your responses, NEVER have Student or AI labels at the start. Return only the AI response without a tag no matter what. The following tags are merely to understand the system prompt. You are the academic advisor AI for a university's Computer Science department. Your role is to assist students with inquiries about courses, provide detailed information about course content, prerequisites, and outcomes, and guide them on course selections.
@@ -26,7 +27,7 @@ Remember, your primary goal is to provide accurate and helpful information, ensu
 `;
 
 // Initialize OpenAI
-const openai = new OpenAI();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Make sure the API key is set in your environment variables
 
 // Function to retrieve relevant documents from the knowledge base
 function retrieveDocuments(query) {
@@ -48,7 +49,6 @@ function retrieveDocuments(query) {
     const containsQueryWord = queryWords.some(word => contentLower.includes(word));
 
     if (containsQueryWord) {
-      console.log(doc)
       relevantDocs.push(doc);
     }
   });
@@ -61,55 +61,78 @@ function retrieveDocuments(query) {
 }
 
 export async function POST(req) {
-  // Parse the request body to extract the `query` parameter
   const { query } = await req.json();
 
-  // Validation: Check if `query` is a valid string
   if (typeof query !== 'string' || query.trim() === '') {
-    console.error("Invalid query received:", query);
-    return new NextResponse(JSON.stringify({ error: "Invalid query" }), { status: 400 });
+    return new NextResponse(JSON.stringify({ error: 'Invalid query' }), { status: 400 });
   }
 
-  console.log("Received query:", query);  // Log the received query for debugging
-
-  // Retrieve relevant documents based on the validated query
   const retrievedDocs = retrieveDocuments(query);
-
-  // Combine the retrieved documents to form a context
   const context = retrievedDocs.map(doc => doc.content).join("\n");
-
-  // Modify the system prompt to include the retrieved context
   const modifiedPrompt = `${systemPrompt}\n\nContext:\n${context}\n\n`;
 
-  // Generate the response using OpenAI's API
-  const completion = await openai.chat.completions.create({
-    messages: [
-      { role: "system", content: modifiedPrompt },
-      { role: "user", content: query },
-    ],
-    model: "gpt-3.5-turbo",
-    stream: true,
-  });
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: modifiedPrompt },
+        { role: 'user', content: query },
+      ],
+      model: 'gpt-3.5-turbo',
+      stream: true,
+    });
 
-  // Stream the response back to the client
-  const stream = new ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder();
-      try {
-        for await (const chunk of completion) {
-          const content = chunk.choices[0]?.delta?.content;
-          if (content) {
-            const text = encoder.encode(content);
-            controller.enqueue(text);
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        try {
+          for await (const chunk of completion) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              const text = encoder.encode(content);
+              controller.enqueue(text);
+            }
           }
+        } catch (err) {
+          controller.error(err);
+        } finally {
+          controller.close();
         }
-      } catch (err) {
-        controller.error(err);
-      } finally {
-        controller.close();
-      }
-    },
-  });
+      },
+    });
 
-  return new NextResponse(stream);
+    return new NextResponse(stream);
+
+  } catch (error) {
+    console.error('Error generating response:', error);
+    return new NextResponse(JSON.stringify({ error: 'Failed to generate response' }), { status: 500 });
+  }
 }
+
+export async function GET() {
+  try {
+    // Establish a connection to the database
+    const client = await pool.connect();
+
+    // Debug log to verify the function is running
+    console.log("Database connection established");
+
+    // Execute the query to select all courses
+    const result = await client.query('SELECT * FROM courses');
+
+    // Debug log to verify the query result
+    console.log("Query Result:", result.rows);
+
+    // Release the client back to the pool
+    client.release();
+
+    // Return the query result as JSON
+    return NextResponse.json(result.rows);
+  } catch (error) {
+    // Log any errors that occur during the process
+    console.error('Error fetching courses:', error);
+
+    // Return an error response
+    return NextResponse.json({ error: 'Failed to fetch courses' }, { status: 500 });
+  }
+}
+
