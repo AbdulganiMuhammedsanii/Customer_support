@@ -1,34 +1,25 @@
 "use client";
 import { Box, Stack, Menu, Modal, TextField, Button, Typography, IconButton, Select, MenuItem, Avatar, ThemeProvider, createTheme, CssBaseline, useMediaQuery, Drawer } from '@mui/material';
-import { Brightness4, Brightness7, AirplanemodeActive as AirplanemodeActiveIcon, Google, Menu as MenuIcon } from '@mui/icons-material';
+import { Brightness4, Brightness7, AirplanemodeActive as AirplanemodeActiveIcon, Google, Menu as MenuIcon, School as SchoolIcon } from '@mui/icons-material'; // Import the SchoolIcon here
 import { useState, useEffect } from 'react';
 import { collection, query, orderBy, addDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { auth, provider, signInWithPopup, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';  // Import useRouter for navigation
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
-const getInitialMessage = (language) => {
-  switch (language) {
-    case 'es':
-      return '¡Hola! Bienvenido al Asesor Académico de Informática. ¿En qué puedo ayudarte hoy?';
-    case 'zh':
-      return '你好！欢迎来到计算机科学学术顾问！今天我能为您做些什么？';
-    default:
-      return 'Hello! Welcome to the Computer Science Academic Advisor. How can I assist you today?';
-  }
-};
 
 export default function Home() {
-  const [darkMode, setDarkMode] = useState(true);
   const [language, setLanguage] = useState('en');
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null); // Anchor for the Menu component
   const [conversationHistory, setConversationHistory] = useState([]);
-  const [messages, setMessages] = useState([{ role: 'assistant', content: getInitialMessage(language) }]);
   const [message, setMessage] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false); // State for Drawer
   const router = useRouter();
+  const { user, darkMode, setDarkMode, signInWithGoogle, handleSignOut, getInitialMessage } = useContext(AuthContext);
+  const [messages, setMessages] = useState([{ role: 'assistant', content: getInitialMessage(language) }]);
 
   const isMobile = useMediaQuery('(max-width:600px)');
 
@@ -47,7 +38,7 @@ export default function Home() {
         paper: darkMode ? '#1e1e1e' : '#ffffff',
       },
       text: {
-        primary: darkMode ? '#e0e0e0' : '#000000',
+        primary: darkMode ? '#ffffff' : '#000000',
         secondary: darkMode ? '#b0b0b0' : '#5f6368',
       },
     },
@@ -69,30 +60,12 @@ export default function Home() {
     setMessages([{ role: 'assistant', content: getInitialMessage(language) }]);
   }, [language]);
 
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const toggleDrawer = () => setDrawerOpen(!drawerOpen); // Toggle Drawer
 
-  const signInWithGoogle = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-      handleClose();
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);
-      setConversationHistory([]);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
 
   const sendMessage = async () => {
     const userMessage = {
@@ -191,13 +164,13 @@ export default function Home() {
       flexDirection="column"
       alignItems="flex-start"
       sx={{
-        backgroundColor: darkMode ? '#1c1c1c' : '#fafafa',
+        backgroundColor: darkMode ? '#1e1e1e' : '#e0e0e0', // Set the entire panel to a gray color
         boxShadow: darkMode
           ? 'inset -1px 0 0 0 rgba(255, 255, 255, 0.12)'
           : 'inset -1px 0 0 0 rgba(0, 0, 0, 0.12)',
       }}
     >
-      <Typography variant="h6" component="div" mb={3} sx={{ color: 'inherit', fontWeight: 'bold' }}>
+      <Typography variant="h6" component="div" mb={3} sx={{ color: '1c1c1c', fontWeight: 'bold' }}>
         Conversation History
       </Typography>
       <Stack spacing={3} overflow="auto" sx={{ width: '100%' }}>
@@ -205,14 +178,14 @@ export default function Home() {
           <Box
             key={index}
             p={2}
-            bgcolor={user ? (darkMode ? 'background.paper' : 'primary.light') : (darkMode ? '#1c1c1c' : '#f5f5f5')}
+            bgcolor={user ? (darkMode ? '#3a3a3a' : '#f5f5f5') : (darkMode ? '#3a3a3a' : '#f5f5f5')} // Adjust the background of each conversation box
             color="text.primary"
             borderRadius={4}
             boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
             sx={{
               transition: 'background-color 0.3s, box-shadow 0.3s',
               '&:hover': {
-                backgroundColor: user ? (darkMode ? '#333' : '#e3f2fd') : (darkMode ? '#1c1c1c' : '#f5f5f5'),
+                backgroundColor: user ? (darkMode ? '#4a4a4a' : '#e3f2fd') : (darkMode ? '#4a4a4a' : '#f5f5f5'), // Darker gray on hover in dark mode
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
               },
             }}
@@ -226,6 +199,7 @@ export default function Home() {
       </Stack>
     </Box>
   );
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -257,29 +231,17 @@ export default function Home() {
               >
                 <MenuIcon />
               </IconButton>
-              <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+              <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                 CornellGPT
               </Typography>
               <Box display="flex" alignItems="center" ml="auto">
-                <Button
-                  variant="contained"
+                {/* Replace the Button with IconButton containing a graduation cap icon */}
+                <IconButton
                   onClick={handleNavigate}
-                  sx={{
-                    ml: 2,
-                    mr: 2,
-                    borderRadius: '8px',
-                    padding: '10px 20px',
-                    backgroundColor: darkMode ? '#333' : '#1976d2', // Blue color in light mode
-                    color: '#ffffff',
-                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-                    '&:hover': {
-                      backgroundColor: darkMode ? '#444' : '#1565c0', // Darker blue on hover in light mode
-                      boxShadow: '0 6px 15px rgba(0, 0, 0, 0.3)',
-                    },
-                  }}
-                >
-                  Courses
-                </Button>
+                  color="inherit"
+                  sx={{ mr: 2 }}>
+                  <SchoolIcon />
+                </IconButton>
                 <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
                   {darkMode ? <Brightness7 /> : <Brightness4 />}
                 </IconButton>
@@ -314,68 +276,69 @@ export default function Home() {
             </Drawer>
           </>
         ) : (
-          <Box
-            width="350px"
-            height="100vh"
-            borderRight="1px solid"
-            borderColor="divider"
-            p={3}
-            display="flex"
-            flexDirection="column"
-            alignItems="flex-start"
-            sx={{
-              backgroundColor: darkMode ? '#1c1c1c' : '#fafafa',
-              boxShadow: darkMode
-                ? 'inset -1px 0 0 0 rgba(255, 255, 255, 0.12)'
-                : 'inset -1px 0 0 0 rgba(0, 0, 0, 0.12)',
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="div"
-              mb={3}
+          user && (
+            <Box
+              width="350px"
+              height="100vh"
+              borderRight="1px solid"
+              borderColor="divider"
+              p={3}
+              display="flex"
+              flexDirection="column"
+              alignItems="flex-start"
               sx={{
-                color: 'text.primary',
-                fontWeight: 'bold',
+                backgroundColor: darkMode ? '#1c1c1c' : '#fafafa',
+                boxShadow: darkMode
+                  ? 'inset -1px 0 0 0 rgba(255, 255, 255, 0.12)'
+                  : 'inset -1px 0 0 0 rgba(0, 0, 0, 0.12)',
               }}
             >
-              Conversation History
-            </Typography>
-            <Stack
-              spacing={3}
-              overflow="auto"
-              sx={{
-                width: '100%',
-              }}
-            >
-              {conversationHistory.map((conversation, index) => (
-                <Box
-                  key={index}
-                  p={2}
-                  bgcolor={darkMode ? 'background.paper' : 'primary.light'}
-                  color="text.primary"
-                  borderRadius={4}
-                  boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
-                  sx={{
-                    transition: 'background-color 0.3s, box-shadow 0.3s',
-                    '&:hover': {
-                      backgroundColor: darkMode ? '#333' : '#e3f2fd',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
+              <Typography
+                variant="h6"
+                component="div"
+                mb={3}
+                sx={{
+                  color: 'text.primary',
+                  fontWeight: 'bold',
+                }}
+              >
+                Conversation History
+              </Typography>
+              <Stack
+                spacing={3}
+                overflow="auto"
+                sx={{
+                  width: '100%',
+                }}
+              >
+                {conversationHistory.map((conversation, index) => (
+                  <Box
+                    key={index}
+                    p={2}
+                    bgcolor={darkMode ? 'background.paper' : 'primary.light'}
+                    color="text.primary"
+                    borderRadius={4}
+                    boxShadow="0 2px 8px rgba(0, 0, 0, 0.1)"
+                    sx={{
+                      transition: 'background-color 0.3s, box-shadow 0.3s',
+                      '&:hover': {
+                        backgroundColor: darkMode ? '#333' : '#e3f2fd',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                      },
+                    }}
                   >
-                    {conversation.role === 'assistant' ? 'Assistant' : 'You'}
-                  </Typography>
-                  <Typography variant="body2">{conversation.content}</Typography>
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-        )}
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                    >
+                      {conversation.role === 'assistant' ? 'Assistant' : 'You'}
+                    </Typography>
+                    <Typography variant="body2">{conversation.content}</Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+          ))}
 
         <Box
           width="100%"
@@ -395,28 +358,11 @@ export default function Home() {
               borderBottom="1px solid"
               borderColor="divider"
             >
-              <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+              <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                 CornellGPT
               </Typography>
               <Box display="flex" alignItems="center" ml="auto">
-                <Button
-                  variant="contained"
-                  onClick={handleNavigate}
-                  sx={{
-                    mr: 2,
-                    borderRadius: '8px',
-                    padding: '10px 20px',
-                    backgroundColor: darkMode ? '#333' : '#1976d2', // Blue color in light mode
-                    color: '#ffffff',
-                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-                    '&:hover': {
-                      backgroundColor: darkMode ? '#444' : '#1565c0', // Darker blue on hover in light mode
-                      boxShadow: '0 6px 15px rgba(0, 0, 0, 0.3)',
-                    },
-                  }}
-                >
-                  COURSES
-                </Button>
+
                 <Select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
@@ -428,13 +374,19 @@ export default function Home() {
                   <MenuItem value="es">Español</MenuItem>
                   <MenuItem value="zh">中文</MenuItem>
                 </Select>
+                <IconButton
+                  onClick={handleNavigate}
+                  color="inherit"
+                  sx={{ mr: 2 }}>
+                  <SchoolIcon />
+                </IconButton>
                 <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
                   {darkMode ? <Brightness7 /> : <Brightness4 />}
                 </IconButton>
                 <IconButton
                   color="inherit"
                   sx={{ ml: 2 }}
-                  onClick={user ? handleSignOut : signInWithGoogle}  // Direct redirect on click
+                  onClick={user ? handleSignOut : signInWithGoogle}
                 >
                   <Avatar
                     sx={{
@@ -498,7 +450,7 @@ export default function Home() {
               ))}
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction="row" spacing={2} width="100%">
               <TextField
                 label="Type a message..."
                 variant="outlined"

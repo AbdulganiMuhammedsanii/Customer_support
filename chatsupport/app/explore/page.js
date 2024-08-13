@@ -1,20 +1,22 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, IconButton, Avatar, Menu, MenuItem, Modal, Grid, LinearProgress, Rating } from '@mui/material';
-import { Brightness4, Brightness7, Google, School as SchoolIcon } from '@mui/icons-material';
+import { Brightness4, Brightness7, Google, School as SchoolIcon, Home as HomeIcon } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { auth, provider, signInWithPopup } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
+import { AuthContext } from '../../context/AuthContext';
+import { useContext } from 'react';
+
 
 export default function Explore() {
-  const [darkMode, setDarkMode] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [user, setUser] = useState(null);
   const [courses, setCourses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [open, setOpen] = useState(false); // Modal state
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const { user, darkMode, setDarkMode, signInWithGoogle, handleSignOut, language, message } = useContext(AuthContext);
 
   // Fetch courses from the database
   useEffect(() => {
@@ -47,24 +49,6 @@ export default function Explore() {
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
-  const signInWithGoogle = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);
-      handleMenuClose();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
 
   const handleOpen = (cls) => {
     setSelectedClass(cls);
@@ -102,24 +86,14 @@ export default function Explore() {
         </Typography>
 
         <Box display="flex" alignItems="center" ml="auto">
-          <Button
-            variant="contained"
+          <IconButton
             onClick={handleNavigate}
-            sx={{
-              mr: 2,
-              borderRadius: '8px',
-              padding: '10px 20px',
-              backgroundColor: darkMode ? '#333' : '#1976d2', // Blue color in light mode
-              color: '#ffffff',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-              '&:hover': {
-                backgroundColor: darkMode ? '#444' : '#1565c0', // Darker blue on hover in light mode
-                boxShadow: '0 6px 15px rgba(0, 0, 0, 0.3)',
-              },
-            }}
+            color="inherit"
+            sx={{ mr: 2 }}
           >
-            Home
-          </Button>
+            <HomeIcon /> {/* Adjust the size of the icon */}
+          </IconButton>
+
 
           <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
             {darkMode ? <Brightness7 /> : <Brightness4 />}
@@ -128,9 +102,10 @@ export default function Explore() {
           <IconButton
             color="inherit"
             sx={{ ml: 2 }}
-            onClick={user ? handleMenuOpen : signInWithGoogle}
           >
+
             <Avatar
+              onClick={user ? handleSignOut : signInWithGoogle}
               sx={{
                 bgcolor: darkMode ? '#1c1c1c' : '#f5f5f5',
                 color: darkMode ? '#90caf9' : '#1976d2',
@@ -140,29 +115,6 @@ export default function Explore() {
               {user ? <Avatar src={user.photoURL} /> : <Google />}
             </Avatar>
           </IconButton>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            PaperProps={{
-              sx: {
-                mt: 1.5,
-                minWidth: 180,
-                bgcolor: darkMode ? '#1e1e1e' : '#ffffff',
-                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-                '& .MuiMenuItem-root': {
-                  padding: '12px 20px',
-                },
-              }
-            }}
-          >
-            {user && (
-              <MenuItem onClick={handleSignOut} sx={{ color: 'error.main', fontWeight: 'bold' }}>
-                Sign Out
-              </MenuItem>
-            )}
-          </Menu>
         </Box>
       </Box>
 
