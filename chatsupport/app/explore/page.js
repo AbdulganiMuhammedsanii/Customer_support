@@ -211,7 +211,7 @@ export default function Explore() {
               Professor: {selectedClass?.professor}
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              Professor Rating
+              RateMyProfessors Rating:
             </Typography>
             <Rating
               name="professor-rating"

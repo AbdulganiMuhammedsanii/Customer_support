@@ -11,17 +11,32 @@ import { useContext } from 'react';
 
 
 export default function Home() {
-  const [language, setLanguage] = useState('en');
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null); // Anchor for the Menu component
   const [conversationHistory, setConversationHistory] = useState([]);
   const [message, setMessage] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false); // State for Drawer
   const router = useRouter();
-  const { user, darkMode, setDarkMode, signInWithGoogle, handleSignOut, getInitialMessage } = useContext(AuthContext);
+  const { user, darkMode, setDarkMode, signInWithGoogle, handleSignOut } = useContext(AuthContext);
+
+  const [language, setLanguage] = useState('en');
+
+  const getInitialMessage = (language) => {
+    switch (language) {
+      case 'es':
+        return '¡Hola! Bienvenido al Asesor Académico de Informática. ¿Cómo puedo ayudarte hoy? ¡Pregunte por los principales requisitos, cursos y políticas generales!';
+      case 'zh':
+        return ' 你好！欢迎来到计算机科学学术顾问。今天我能为您提供什么帮助？询问专业要求、课程以及一般政策！';
+      default:
+        return 'Hello! Welcome to the Computer Science Academic Advisor. How can I assist you today? Ask about major requirements, courses, as well general policies !';
+    }
+  };
+
   const [messages, setMessages] = useState([{ role: 'assistant', content: getInitialMessage(language) }]);
 
   const isMobile = useMediaQuery('(max-width:600px)');
+
+
 
   const handleNavigate = () => {
     router.push('/explore');  // Navigate to the explore page
@@ -68,15 +83,18 @@ export default function Home() {
 
 
   const sendMessage = async () => {
+    // Construct the user message
     const userMessage = {
       role: 'user',
       content: message,
       timestamp: Timestamp.now(),
     };
 
+    // Update the local message state and clear the input field
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setMessage('');
 
+    // Save the user message to Firestore if the user is logged in
     if (user) {
       try {
         const conversationRef = collection(db, 'users', user.uid, 'conversations');
@@ -86,50 +104,47 @@ export default function Home() {
       }
     }
 
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query: message }),
-    });
+    // Send the user's message to the API
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage]  // Send the entire history including the new message
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let assistantMessageContent = '';
+        }),
+      });
 
-    const processText = async ({ done, value }) => {
-      if (done) {
-        const assistantMessage = {
-          role: 'assistant',
-          content: assistantMessageContent,
-          timestamp: Timestamp.now(),
-        };
+      // Extract the assistant's response text
+      const assistantMess = await response.json();
+      console.log('Assistant:', assistantMess.response);
+      const assistantMessageContent = assistantMess.response;
+      // Construct the assistant message object
+      const assistantMessage = {
+        role: 'assistant',
+        content: assistantMessageContent,
+        timestamp: Timestamp.now(),
+      };
 
-        setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+      // Update the local message state with the assistant's response
+      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
 
-        if (user) {
-          try {
-            const conversationRef = collection(db, 'users', user.uid, 'conversations');
-            await addDoc(conversationRef, assistantMessage);
-          } catch (error) {
-            console.error('Error saving assistant response to Firestore:', error);
-          }
+      // Save the assistant's message to Firestore if the user is logged in
+      if (user) {
+        try {
+          const conversationRef = collection(db, 'users', user.uid, 'conversations');
+          await addDoc(conversationRef, assistantMessage);
+        } catch (error) {
+          console.error('Error saving assistant response to Firestore:', error);
         }
-
-        return;
       }
-
-      let text = decoder.decode(value || new Uint8Array(), { stream: true });
-      text = text.replace(/^(Customer:|AI:)\s*/g, '');
-      assistantMessageContent += text;
-
-      const { value: nextValue, done: nextDone } = await reader.read();
-      return processText({ done: nextDone, value: nextValue });
-    };
-
-    await reader.read().then(processText);
+    } catch (error) {
+      console.error('Error sending message to the API:', error);
+    }
   };
+
 
   useEffect(() => {
     const fetchConversationHistory = async () => {
@@ -232,7 +247,7 @@ export default function Home() {
                 <MenuIcon />
               </IconButton>
               <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-                CornellGPT
+                CornellAdvisor
               </Typography>
               <Box display="flex" alignItems="center" ml="auto">
                 {/* Replace the Button with IconButton containing a graduation cap icon */}
@@ -359,7 +374,7 @@ export default function Home() {
               borderColor="divider"
             >
               <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-                CornellGPT
+                CornellAdvisor
               </Typography>
               <Box display="flex" alignItems="center" ml="auto">
 
@@ -421,33 +436,39 @@ export default function Home() {
             }}
           >
             <Stack direction="column" spacing={2} flexGrow={1}>
-              {messages.map((message, index) => (
-                <Box
-                  key={index}
-                  display="flex"
-                  justifyContent={message.role === 'assistant' ? 'flex-start' : 'flex-end'}
-                >
+              {messages && messages.length > 0 ? (
+                messages.map((message, index) => (
                   <Box
-                    bgcolor={message.role === 'assistant' ? 'text.light' : 'primary.light'}
-                    color={message.role === 'assistant' ? 'text.primary' : 'black'}
-                    borderRadius={8}
-                    p={2}
-                    maxWidth="70%"
-                    sx={{
-                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-                      fontSize: '1rem',
-                      transition: 'background-color 0.3s, box-shadow 0.3s',
-                      '&:hover': {
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-                      },
-                    }}
+                    key={index}
+                    display="flex"
+                    justifyContent={message.role === 'assistant' ? 'flex-start' : 'flex-end'}
                   >
-                    <Typography variant="body1" fontWeight={message.role === 'assistant' ? 'bold' : 'bold'}>
-                      {message.content}
-                    </Typography>
+                    <Box
+                      bgcolor={message.role === 'assistant' ? 'text.light' : 'primary.light'}
+                      color={message.role === 'assistant' ? 'text.primary' : 'black'}
+                      borderRadius={8}
+                      p={2}
+                      maxWidth="70%"
+                      sx={{
+                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                        fontSize: '1rem',
+                        transition: 'background-color 0.3s, box-shadow 0.3s',
+                        '&:hover': {
+                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                        },
+                      }}
+                    >
+                      <Typography variant="body1" fontWeight={message.role === 'assistant' ? 'bold' : 'bold'}>
+                        {message.content}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                ))
+              ) : (
+                <Typography variant="body1" textAlign="center" color="text.secondary">
+                  No messages yet.
+                </Typography>
+              )}
             </Stack>
 
             <Stack direction="row" spacing={2} width="100%">

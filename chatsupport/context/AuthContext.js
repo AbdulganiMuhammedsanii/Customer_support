@@ -9,20 +9,8 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [darkMode, setDarkMode] = useState(true);
-  const [language, setLanguage] = useState('en');
 
-  const getInitialMessage = (language) => {
-    switch (language) {
-      case 'es':
-        return '¡Hola! Bienvenido al Asesor Académico de Informática. ¿En qué puedo ayudarte hoy?';
-      case 'zh':
-        return '你好！欢迎来到计算机科学学术顾问！今天我能为您做些什么？';
-      default:
-        return 'Hello! Welcome to the Computer Science Academic Advisor. How can I assist you today?';
-    }
-  };
 
-  const [messages, setMessages] = useState([{ role: 'assistant', content: getInitialMessage(language) }]);
 
 
   useEffect(() => {
@@ -63,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, darkMode, setDarkMode, signInWithGoogle, handleSignOut, getInitialMessage, language, messages }}>
+    <AuthContext.Provider value={{ user, darkMode, setDarkMode, signInWithGoogle, handleSignOut }}>
       {children}
     </AuthContext.Provider>
   );

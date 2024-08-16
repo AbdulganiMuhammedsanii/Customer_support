@@ -1,0 +1,301 @@
+{
+  "courses": [
+    {
+      "id": "1",
+      "title": "CS 1110 - Introduction to Computing: A Design and Development Perspective",
+      "prereqs": "None",
+      "topics": [
+        "Programming using Python",
+        "Software development principles",
+        "Procedural statements",
+        "Loops",
+        "Functions",
+        "Recursion",
+        "Arrays",
+        "Strings",
+        "Algorithms",
+        "Exceptions",
+        "Object-oriented programming"
+      ],
+      "difficulty": "2",
+      "professor": "Dr. Smith",
+      "professor_rating": "4.5",
+      "description": "CS 1110 introduces programming and problem solving using Python. It emphasizes software development principles, style, and testing. The course is designed for students with no prior programming experience. Assumes basic high school mathematics."
+    },
+    {
+      "id": "2",
+      "title": "CS 1112 - Introduction to Computing: An Engineering and Science Perspective",
+      "prereqs": "None, but knowledge of calculus is assumed",
+      "topics": [
+        "Systematic development of algorithms",
+        "Programming using Python",
+        "Iteration",
+        "Functions",
+        "Arrays",
+        "Strings",
+        "Recursion",
+        "Object-oriented programming",
+        "Data handling and visualization"
+      ],
+      "difficulty": "3",
+      "professor": "Dr. Johnson",
+      "professor_rating": "4.2",
+      "description": "CS 1112 emphasizes the systematic development of algorithms and programs using Python. The course is designed for students with some knowledge of calculus. Programming experience is not required."
+    },
+    {
+      "id": "3",
+      "title": "CS 2110 - Object-Oriented Programming and Data Structures",
+      "prereqs": "CS 1110 or CS 1112",
+      "topics": [
+        "Intermediate programming in Java",
+        "Software engineering concepts",
+        "Object-oriented programming",
+        "Program correctness",
+        "Algorithm analysis",
+        "Recursion",
+        "Data structures (e.g., lists, trees, hash tables)",
+        "Event-driven programming"
+      ],
+      "difficulty": "4",
+      "professor": "Dr. Davis",
+      "professor_rating": "4.7",
+      "description": "CS 2110 focuses on intermediate programming in Java and introduces software engineering concepts. Students are expected to implement nontrivial Java programs and analyze their complexity."
+    },
+    {
+      "id": "4",
+      "title": "CS 2800 - Mathematical Foundations of Computing",
+      "prereqs": "MATH 1910 or equivalent",
+      "topics": [
+        "Mathematical induction",
+        "Logical proof",
+        "Set theory",
+        "Graphs",
+        "Combinatorics",
+        "Discrete mathematics",
+        "Probability theory"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Lee",
+      "professor_rating": "4.6",
+      "description": "CS 2800 covers the mathematics that underpins computer science. These concepts are explored in the context of applications to various areas of computer science."
+    },
+    {
+      "id": "5",
+      "title": "CS 3110 - Data Structures and Functional Programming",
+      "prereqs": "CS 2110 or equivalent",
+      "topics": [
+        "Functional programming techniques",
+        "Recursive and higher-order functions",
+        "Type systems",
+        "Graph algorithms",
+        "Balanced trees",
+        "Memory heaps",
+        "Garbage collection",
+        "Program performance and correctness analysis"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Martinez",
+      "professor_rating": "4.8",
+      "description": "CS 3110 is an advanced programming course that emphasizes functional programming techniques and data structures."
+    },
+    {
+      "id": "6",
+      "title": "CS 3410 - Computer System Organization and Programming",
+      "prereqs": "CS 2110 and CS 2800",
+      "topics": [
+        "Computer organization",
+        "Systems programming",
+        "Hardware/software interface",
+        "Instruction sets",
+        "Computer arithmetic",
+        "Memory hierarchies",
+        "I/O devices",
+        "Multicore architectures",
+        "Assembly language programming",
+        "Pipelined RISC processor design"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Brown",
+      "professor_rating": "4.9",
+      "description": "CS 3410 introduces computer organization, systems programming, and the hardware/software interface."
+    },
+    {
+      "id": "7",
+      "title": "CS 3700 - Foundations of AI Reasoning and Decision-Making",
+      "prereqs": "CS 2110 and CS 2800",
+      "topics": [
+        "Heuristic search",
+        "Game-playing",
+        "Knowledge representation and reasoning",
+        "Planning",
+        "Probabilistic inference",
+        "Sequential decision-making",
+        "Reinforcement learning"
+      ],
+      "difficulty": "4",
+      "professor": "Dr. Wilson",
+      "professor_rating": "4.5",
+      "description": "CS 3700 introduces major topics in artificial intelligence, including heuristic search, game-playing, knowledge representation and reasoning, planning, and reinforcement learning."
+    },
+    {
+      "id": "8",
+      "title": "CS 3780 - Introduction to Machine Learning",
+      "prereqs": "CS 2800 and CS 3110",
+      "topics": [
+        "Supervised learning",
+        "Regularized linear models",
+        "Boosting",
+        "Kernels",
+        "Deep networks",
+        "Generative models",
+        "Online learning",
+        "Ethical questions in ML"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Thompson",
+      "professor_rating": "4.7",
+      "description": "CS 3780 provides an introduction to machine learning, focusing on supervised learning and its theoretical foundations."
+    },
+    {
+      "id": "9",
+      "title": "CS 4110 - [Programming Languages and Logics]",
+      "prereqs": "CS 3110 or permission of instructor",
+      "topics": [
+        "Theory of programming languages",
+        "Operational semantics",
+        "Type systems",
+        "Higher-order functions",
+        "Scope",
+        "Lambda calculus",
+        "Laziness",
+        "Exceptions",
+        "Side effects",
+        "Continuations",
+        "Objects",
+        "Modules",
+        "Logic programming",
+        "Concurrency",
+        "Distributed programming"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Nguyen",
+      "professor_rating": "4.8",
+      "description": "CS 4110 is an introduction to the theory, design, and implementation of programming languages."
+    },
+    {
+      "id": "10",
+      "title": "CS 4120 - Introduction to Compilers",
+      "prereqs": "CS 3110 or permission of instructor",
+      "topics": [
+        "Specification and implementation of modern compilers",
+        "Lexical scanning",
+        "Parsing",
+        "Type checking",
+        "Code generation and translation",
+        "Program analysis and optimization",
+        "Compile-time and run-time support for programming languages"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Patel",
+      "professor_rating": "4.9",
+      "description": "CS 4120 introduces the specification and implementation of modern compilers. Students will build a working compiler for an object-oriented language."
+    },
+    {
+      "id": "11",
+      "title": "CS 4121 - Practicum in Compilers",
+      "prereqs": "CS 4120 (co-requisite)",
+      "topics": [
+        "Practical implementation of a compiler for an object-oriented language"
+      ],
+      "difficulty": "4",
+      "professor": "Dr. Patel",
+      "professor_rating": "4.9",
+      "description": "CS 4121 is a practicum course where students will build a working compiler for an object-oriented language."
+    },
+    {
+      "id": "12",
+      "title": "CS 4320 - Introduction to Database Systems",
+      "prereqs": "CS 3110 or equivalent",
+      "topics": [
+        "Modern database and data storage systems",
+        "Data models",
+        "Query languages",
+        "Database design",
+        "Storage structures",
+        "Access methods",
+        "Query processing and optimization",
+        "Transaction management",
+        "Recovery in relational and non-relational data storage systems"
+      ],
+      "difficulty": "4",
+      "professor": "Dr. Kim",
+      "professor_rating": "4.6",
+      "description": "CS 4320 provides an introduction to modern database and data storage systems."
+    },
+    {
+      "id": "13",
+      "title": "CS 4321 - Practicum in Database Systems",
+      "prereqs": "CS 4320 (co-requisite)",
+      "topics": [
+        "Practical implementation of database systems in Java"
+      ],
+      "difficulty": "4",
+      "professor": "Dr. Kim",
+      "professor_rating": "4.6",
+      "description": "CS 4321 is a practicum course where students build part of a database system in Java."
+    },
+    {
+      "id": "14",
+      "title": "CS 4410 - Operating Systems",
+      "prereqs": "CS 3410 or equivalent",
+      "topics": [
+        "Design of systems programs",
+        "Multiprogrammed operating systems",
+        "Concurrency",
+        "Synchronization",
+        "Deadlocks",
+        "Memory management",
+        "Protection",
+        "Input-output methods",
+        "Networking",
+        "File systems",
+        "Security"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. White",
+      "professor_rating": "4.8",
+      "description": "CS 4410 introduces the design of systems programs, with an emphasis on multiprogrammed operating systems."
+    },
+    {
+      "id": "15",
+      "title": "CS 4411 - Practicum in Operating Systems",
+      "prereqs": "CS 4410 (co-requisite)",
+      "topics": [
+        "Practical implementation of an operating system kernel"
+      ],
+      "difficulty": "4",
+      "professor": "Dr. White",
+      "professor_rating": "4.8",
+      "description": "CS 4411 studies the practical aspects of operating systems through the design and implementation of an operating system kernel."
+    },
+    {
+      "id": "16",
+      "title": "CS 4414 - Systems Programming",
+      "prereqs": "CS 4410 or equivalent",
+      "topics": [
+        "Programming at the systems level",
+        "Operating-systems abstractions",
+        "Process and memory management",
+        "File systems and storage",
+        "Networking",
+        "Threads and multiprocess concurrency",
+        "Synchronization abstractions",
+        "Security abstractions for isolation and authorization"
+      ],
+      "difficulty": "5",
+      "professor": "Dr. Green",
+      "professor_rating": "4.7",
+      "description": "CS 4414 exposes students to programming applications at the systems level and to the operating-systems abstractions that these applications depend on."
+    }
+  ]
+}

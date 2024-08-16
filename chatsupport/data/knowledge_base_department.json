@@ -1,0 +1,35 @@
+{
+  "computer_science": {
+    "major": "Computer Science",
+    "general_description": "Computer science majors take courses covering algorithms, data structures, logic, programming languages, systems, and theory. Electives include artificial intelligence, computer graphics, computer vision, cryptography, databases, networks, and scientific computing.",
+    "degree_offered": [
+      {
+        "degree": "Bachelor of Science",
+        "college": "College of Engineering"
+      },
+      {
+        "degree": "Bachelor of Arts",
+        "college": "College of Arts and Sciences"
+      }
+    ],
+    "calculus_sequence": {
+      "arts_and_sciences": "Math 1110-1120-2210",
+      "engineering": "Math 1910-1920-2940"
+    },
+    "introductory_programming_courses": "CS 111x (CS 1110 or 1112), CS 2110 (or CS 2112) or equivalent (ECE 2400/ENGRD 2140)",
+    "core_courses": "CS 2800 (or CS 2802), CS 3110, CS 3410 or CS 3420, CS 4410 or CS 4414, CS 4820",
+    "cs_electives": "Three 4000+ level CS electives each at three credits. Exceptions: CS 4090, CS 4998, and CS 4999 are NOT allowed.",
+    "cs_practicum_or_project_course": "CS practicums (CS 4xx1), CS 3152, CS 4152, CS 4154, CS 4740, CS 4752, CS 5150, CS 5152, CS 5412, CS 5414, CS 5431, CS 5625, CS 5643",
+    "technical_electives": "Three 3000+ level Technical Electives (3 credit min per course)",
+    "external_specialization": "Three 3000+ level related courses to comprise an External Specialization—outside of computer science (3 credit min per course)",
+    "major_approved_elective": "3 credits Major-approved Elective(s)",
+    "probability_course": "One of BTRY/STSCI 3080, CS 4850, ECE 3100, ECON 3130, ENGRD 2700 or MATH 4710. (Choosing a 3000+ level course among these options is strongly recommended.)",
+    "vectors": "For suggestions on how to select a set of electives that reflect one of a number of coherent, recognized sub-areas of study in computer science, see the material on Vectors. Please note that completion of a Vector is not required and vector completion is not confirmed nor noted on the transcript.",
+    "degree_advantage": "Neither program has a particular advantage from the standpoint of employment or graduate school.",
+    "academic_integrity": {
+      "principle": "Absolute integrity is expected of every Cornell student in all academic undertakings; students must in no way misrepresent their work fraudulently or unfairly advance their academic status, or be a party to another student's failure to maintain academic integrity.",
+      "general_responsibilities": "A student assumes responsibility for the content and integrity of the academic work they submit, such as papers, examinations, or reports. A student shall be guilty of violating the Code and subject to proceedings under it if they: knowingly represent the work of others as their own; use or obtain unauthorized assistance in any academic work; give fraudulent assistance to another student; fabricate data in support of laboratory or field work; forge a signature to certify completion or approval of a course assignment; or in any other manner violate the principle of absolute integrity.",
+      "specific_remarks": "Unless otherwise specified by the individual professor, the work you do in Computer Science courses is expected to be the result of your individual effort. Discussion of general strategy or algorithms is permissible, but you may not collaborate in the detailed development or actual writing of an assignment. The penalty for any violation of this Code in Computer Science courses may be failure in the course. Computer accounts are provided for course work only. They are not private accounts; they belong to the Department of Computer Science and the use of these accounts will be monitored in various ways."
+    }
+  }
+}
