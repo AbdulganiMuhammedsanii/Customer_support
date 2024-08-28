@@ -158,9 +158,6 @@ export default function Explore() {
                     <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'inherit' }}>
                       {cls.title}
                     </Typography>
-                    <Typography variant="body1" sx={{ mt: 2, color: 'inherit' }}>
-                      {cls.description}
-                    </Typography>
                     <Box sx={{ mt: 2, width: '100%' }}>
                       <Typography variant="body2" sx={{ mb: 1, color: 'inherit' }}>
                         Difficulty
